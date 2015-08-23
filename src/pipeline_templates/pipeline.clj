@@ -12,31 +12,42 @@
         [clojure.tools.logging :as log])
   (:gen-class))
 
+(def projects [{:name         "LambdaCD"
+                :pipeline-url "/lambdacd"
+                :repo-uri     "git@github.com:flosell/lambdacd.git"
+                :test-command "./go test"}
+               {:name         "LambdaCD Artifacts"
+                :pipeline-url "/artifacts"
+                :repo-uri     "git@github.com:flosell/lambdacd-artifacts.git"
+                :test-command "./go test"}
+               {:name         "LambdaCD Leiningen Template"
+                :pipeline-url "/template"
+                :repo-uri     "git@github.com:flosell/lambdacd-template.git"
+                :test-command "lein test"}])
 
-
-(defn mk-pipeline-def [repo-uri]
+(defn mk-pipeline-def [{repo-uri :repo-uri test-command :test-command}]
   `(
      wait-for-manual-trigger
      (with-repo ~repo-uri
-                build
+                (run-tests ~test-command)
                 publish)))
 
-
-
-(defn foo [repo-uri]
-  (let [home-dir (util/create-temp-dir)
-        config { :home-dir home-dir :dont-wait-for-completion false}
-        pipeline (lambdacd/assemble-pipeline (mk-pipeline-def repo-uri) config)
-        app      (ui/ui-for pipeline)]
+(defn pipeline-for [project]
+  (let [home-dir     (util/create-temp-dir)
+        config       { :home-dir home-dir :dont-wait-for-completion false}
+        pipeline-def (mk-pipeline-def project)
+        pipeline     (lambdacd/assemble-pipeline pipeline-def config)
+        app          (ui/ui-for pipeline)]
     (runners/start-one-run-after-another pipeline)
-  app))
+    app))
 
+(defn mk-context [project]
+  (let [app (pipeline-for project)] ; don't inline this, otherwise compojure will always re-initialize a pipeline on each HTTP request
+    (compojure/context (:pipeline-url project) [] app)))
 
 (defn -main [& args]
-  (let [app (foo "some-repo")
-        app2 (foo "some-other-repo")
-        routes (apply compojure/routes
-                 [(compojure/context "/some"       [] app)
-                 (compojure/context "/some-other" [] app2)])]
+  (let [
+        contexts (map mk-context projects)
+        routes (apply compojure/routes contexts)]
        (ring-server/serve routes {:open-browser? false
                                :port 8080})))

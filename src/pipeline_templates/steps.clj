@@ -8,8 +8,9 @@
   (fn [args ctx]
     (core/execute-steps steps (assoc args :repo repo-uri) ctx)))
 
-(defn build [args ctx]
-  (shell/bash ctx "/" (str "echo compiling x" (:repo args))))
+(defn ^{:display-type :step} run-tests [test-command]
+  (fn [args ctx]
+    (shell/bash ctx "/" (str "echo executing " test-command " on " (:repo args)))))
 
 (defn publish [args ctx]
-  (shell/bash ctx "/" (str "echo publishing x" (:repo args))))
+  (shell/bash ctx "/" (str "echo publishing for repo " (:repo args))))
