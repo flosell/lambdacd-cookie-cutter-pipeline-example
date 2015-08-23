@@ -1,13 +1,15 @@
 (ns pipeline-templates.steps
-  (:require [lambdacd.steps.shell :as shell]))
+  (:require [lambdacd.steps.shell :as shell]
+            [lambdacd.core :as core]
+            [lambdacd.steps.git :as git]))
 
-(defn some-step-that-does-nothing [& _]
-  {:status :success})
 
-(defn some-step-that-echos-foo [_ ctx]
-  (shell/bash ctx "/" "echo foo"))
-(defn some-step-that-echos-bar [_ ctx]
-  (shell/bash ctx "/" "echo bar"))
+(defn ^{:display-type :container} with-repo [repo-uri & steps]
+  (fn [args ctx]
+    (core/execute-steps steps (assoc args :repo repo-uri) ctx)))
 
-(defn some-failing-step [_ ctx]
-  (shell/bash ctx "/" "echo \"i am going to fail now...\"" "exit 1"))
+(defn build [args ctx]
+  (shell/bash ctx "/" (str "echo compiling x" (:repo args))))
+
+(defn publish [args ctx]
+  (shell/bash ctx "/" (str "echo publishing x" (:repo args))))

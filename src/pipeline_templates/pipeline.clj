@@ -8,29 +8,35 @@
         [lambdacd.runners :as runners]
         [lambdacd.util :as util]
         [lambdacd.core :as lambdacd]
+        [compojure.core :as compojure]
         [clojure.tools.logging :as log])
   (:gen-class))
 
 
 
-(def pipeline-def
+(defn mk-pipeline-def [repo-uri]
   `(
-    wait-for-manual-trigger
-    some-step-that-does-nothing
-    (in-parallel
-      some-step-that-echos-foo
-      some-step-that-echos-bar)
-    wait-for-manual-trigger
-    some-failing-step
-  ))
+     wait-for-manual-trigger
+     (with-repo ~repo-uri
+                build
+                publish)))
+
+
+
+(defn foo [repo-uri]
+  (let [home-dir (util/create-temp-dir)
+        config { :home-dir home-dir :dont-wait-for-completion false}
+        pipeline (lambdacd/assemble-pipeline (mk-pipeline-def repo-uri) config)
+        app      (ui/ui-for pipeline)]
+    (runners/start-one-run-after-another pipeline)
+  app))
 
 
 (defn -main [& args]
-      (let [home-dir (util/create-temp-dir)
-            config { :home-dir home-dir :dont-wait-for-completion false}
-            pipeline (lambdacd/assemble-pipeline pipeline-def config)
-            app (ui/ui-for pipeline)]
-           (log/info "LambdaCD Home Directory is " home-dir)
-           (runners/start-one-run-after-another pipeline)
-           (ring-server/serve app {:open-browser? false
-                                   :port 8080})))
+  (let [app (foo "some-repo")
+        app2 (foo "some-other-repo")
+        routes (apply compojure/routes
+                 [(compojure/context "/some"       [] app)
+                 (compojure/context "/some-other" [] app2)])]
+       (ring-server/serve routes {:open-browser? false
+                               :port 8080})))
