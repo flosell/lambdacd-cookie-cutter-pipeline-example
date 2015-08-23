@@ -1,6 +1,18 @@
-# pipeline-templates
+# cookie-cutter-pipeline-example
 
-A continuous delivery pipeline for FIXME
+An example on how to use parameterized pipeline templates to generate several pipelines with the same structure. 
+This can be useful if you have several projects that all need basically the same pipeline but have a few minor variations, 
+e.g. different repositories and differently named build scripts. 
+
+This example can also be your introduction on using functions to generate pipelines in general. 
+
+**Note: This example relies on features currently in development.**
+If you still want to try it out, you need to build LambdaCD from the current master. 
+To install the latest code into your local maven repository: 
+
+* `git clone git@github.com:flosell/lambdacd.git`
+* `cd lambdacd`
+* `./go release-local`
 
 ## Usage
 
@@ -10,7 +22,3 @@ A continuous delivery pipeline for FIXME
 
 * `pipeline.clj` contains your pipeline-definition
 * `steps.clj` contains your custom build-steps
-
-## References
-
-* for a more detailed example, look at the [example pipeline](https://github.com/flosell/lambdacd/tree/master/src/todopipeline) in the main LambdaCD project
