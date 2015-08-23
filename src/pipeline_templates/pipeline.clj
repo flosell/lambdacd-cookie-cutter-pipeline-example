@@ -9,6 +9,7 @@
         [lambdacd.util :as util]
         [lambdacd.core :as lambdacd]
         [compojure.core :as compojure]
+        [hiccup.core :as h]
         [clojure.tools.logging :as log])
   (:gen-class))
 
@@ -45,9 +46,24 @@
   (let [app (pipeline-for project)] ; don't inline this, otherwise compojure will always re-initialize a pipeline on each HTTP request
     (compojure/context (:pipeline-url project) [] app)))
 
+
+;; Nice overview page:
+(defn mk-link [{url :pipeline-url name :name}]
+  [:li [:a {:href (str url "/")} name]])
+
+(defn mk-index [projects]
+  (h/html
+    [:html
+     [:head
+      [:title "Pipelines"]]
+     [:body
+      [:h1 "Pipelines:"]
+      [:ul (map mk-link projects)]]]))
+
 (defn -main [& args]
   (let [
         contexts (map mk-context projects)
-        routes (apply compojure/routes contexts)]
+        routes (apply compojure/routes
+                      (conj contexts (compojure/GET "/" [] (mk-index projects))))]
        (ring-server/serve routes {:open-browser? false
                                :port 8080})))
