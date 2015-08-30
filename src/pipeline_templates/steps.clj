@@ -4,8 +4,9 @@
             [lambdacd.steps.git :as git]))
 
 
-(defn ^{:display-type :container} with-repo [repo-uri & steps]
+(defn ^{:display-type :container} with-repo [^:hide repo-uri & steps]
   (fn [args ctx]
+    ; this is a mock 'with-repo' step that doesn't do any git stuff
     (core/execute-steps steps (assoc args :repo repo-uri) ctx)))
 
 (defn ^{:display-type :step} run-tests [test-command]
