@@ -6,13 +6,7 @@ e.g. different repositories and differently named build scripts.
 
 This example can also be your introduction on using functions to generate pipelines in general. 
 
-**Note: This example relies on features currently in development.**
-If you still want to try it out, you need to build LambdaCD from the current master. 
-To install the latest code into your local maven repository: 
-
-* `git clone git@github.com:flosell/lambdacd.git`
-* `cd lambdacd`
-* `./go release-local`
+**Note: This feature relies on LambdaCD versions > 0.5.1.**
 
 ## Usage
 
