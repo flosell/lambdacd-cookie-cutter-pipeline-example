@@ -5,6 +5,7 @@
   (:require
         [ring.server.standalone :as ring-server]
         [lambdacd.ui.ui-server :as ui]
+        [pipeline-templates.custom-ui :as custom-ui]
         [lambdacd.runners :as runners]
         [lambdacd.util :as util]
         [lambdacd.core :as lambdacd]
@@ -35,10 +36,10 @@
 
 (defn pipeline-for [project]
   (let [home-dir     (util/create-temp-dir)
-        config       { :home-dir home-dir :dont-wait-for-completion false}
+        config       { :home-dir home-dir :name (:name project)}
         pipeline-def (mk-pipeline-def project)
         pipeline     (lambdacd/assemble-pipeline pipeline-def config)
-        app          (ui/ui-for pipeline)]
+        app          (custom-ui/ui-for pipeline projects)]
     (runners/start-one-run-after-another pipeline)
     app))
 
