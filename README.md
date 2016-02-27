@@ -6,7 +6,7 @@ e.g. different repositories and differently named build scripts.
 
 This example can also be your introduction on using functions to generate pipelines in general. 
 
-**Note: This feature relies on LambdaCD versions > 0.5.1.**
+**Note: Some features presented here require LambdaCD 0.7.0**
 
 ## Usage
 
