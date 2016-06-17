@@ -39,6 +39,8 @@
         config       { :home-dir home-dir :name (:name project)}
         pipeline-def (mk-pipeline-def project)
         pipeline     (lambdacd/assemble-pipeline pipeline-def config)
+        ui-config    {:expand-active-default true
+                      :expand-failures-default true}
         app          (custom-ui/ui-for pipeline projects)]
     (runners/start-one-run-after-another pipeline)
     app))
