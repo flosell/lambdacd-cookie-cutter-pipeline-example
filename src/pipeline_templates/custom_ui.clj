@@ -20,13 +20,15 @@
    (navbar projects)])
 
 (defn- ui-page [projects pipeline]
-  (let [pipeline-name (get-in pipeline [:context :config :name])]
+  (let [pipeline-name (get-in pipeline [:context :config :name])
+        ui-config-data (get-in pipeline [:context :config :ui-config])]
     (h/html
       [:html
        [:head
         [:title (str pipeline-name " - LambdaCD")]
         (ui-page/favicon)
         (ui-page/css-includes)
+        (ui-page/ui-config ui-config-data)
         [:style ".navbar li { display: inline; padding-right: 20px; }"]]
        [:body
         [:div {:class "app l-horizontal"}
