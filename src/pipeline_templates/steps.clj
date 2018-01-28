@@ -1,7 +1,6 @@
 (ns pipeline-templates.steps
   (:require [lambdacd.steps.shell :as shell]
-            [lambdacd.core :as core]
-            [lambdacd.steps.git :as git]))
+            [lambdacd.execution.core :as core]))
 
 
 (defn ^{:display-type :container} with-repo [^:hide repo-uri & steps]

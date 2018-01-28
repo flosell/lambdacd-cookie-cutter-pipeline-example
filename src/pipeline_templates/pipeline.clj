@@ -4,14 +4,12 @@
         [pipeline-templates.steps])
   (:require
         [ring.server.standalone :as ring-server]
-        [lambdacd.ui.ui-server :as ui]
         [pipeline-templates.custom-ui :as custom-ui]
         [lambdacd.runners :as runners]
         [lambdacd.util :as util]
         [lambdacd.core :as lambdacd]
         [compojure.core :as compojure]
-        [hiccup.core :as h]
-        [clojure.tools.logging :as log])
+        [hiccup.core :as h])
   (:gen-class))
 
 (def projects [{:name         "LambdaCD"
