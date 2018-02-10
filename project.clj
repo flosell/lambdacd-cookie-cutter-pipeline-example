@@ -2,6 +2,7 @@
             :description "FIXME: write description"
             :url "http://example.com/FIXME"
             :dependencies [[lambdacd "0.13.5"]
+                           [lambdacd-git "0.4.0"]
                            [ring-server "0.3.1"]
                            [org.clojure/clojure "1.7.0"]
                            [org.clojure/tools.logging "0.3.0"]

@@ -5,6 +5,7 @@
   (:require
         [ring.server.standalone :as ring-server]
         [pipeline-templates.custom-ui :as custom-ui]
+        [lambdacd-git.core :as git]
         [lambdacd.runners :as runners]
         [lambdacd.util :as util]
         [lambdacd.core :as lambdacd]
@@ -27,19 +28,22 @@
 
 (defn mk-pipeline-def [{repo-uri :repo-uri test-command :test-command}]
   `(
-     wait-for-manual-trigger
-     (with-repo ~repo-uri
-                (run-tests ~test-command)
-                publish)))
+     (either
+       wait-for-manual-trigger
+       (wait-for-commit-on-master ~repo-uri))
+     (with-workspace
+       (clone ~repo-uri)
+       (run-tests ~test-command)
+       publish)))
 
 (defn pipeline-for [project]
   (let [home-dir     (util/create-temp-dir)
         config       { :home-dir home-dir :name (:name project)}
         pipeline-def (mk-pipeline-def project)
         pipeline     (lambdacd/assemble-pipeline pipeline-def config)
-        ui-config    {:expand-active-default true
-                      :expand-failures-default true}
-        app          (custom-ui/ui-for pipeline projects)]
+        app          (compojure/routes
+                       (custom-ui/ui-for pipeline projects)
+                       (git/notifications-for pipeline))]
     (runners/start-one-run-after-another pipeline)
     app))
 
