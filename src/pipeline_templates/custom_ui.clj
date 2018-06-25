@@ -13,7 +13,7 @@
   [:ul {:class "navbar"}
    (for [{pipeline-url :pipeline-url name :name} projects]
      (list
-       [:li [:a {:href (str pipeline-url "/")} (str "| " name " |")]]))])
+       [:li [:a {:href (str pipeline-url "/reference-ui/")} (str "| " name " |")]]))])
 
 (defn- header [projects pipeline-name]
   [:div {:class "app__header"}

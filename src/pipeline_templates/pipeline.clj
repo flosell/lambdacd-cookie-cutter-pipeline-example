@@ -3,11 +3,12 @@
         [lambdacd.steps.manualtrigger]
         [pipeline-templates.steps])
   (:require
-    [ring.server.standalone :as ring-server]
+    [org.httpkit.server :as http-kit]
     [pipeline-templates.custom-ui :as custom-ui]
     [lambdacd-git.core :as git]
     [lambdacd.runners :as runners]
     [lambdacd.core :as lambdacd]
+    [lambdaui.core :as lambdaui]
     [compojure.core :as compojure]
     [hiccup.core :as h])
   (:gen-class)
@@ -37,13 +38,19 @@
        (run-tests ~test-command)
        publish)))
 
+(defn- mk-lambda-ui-links [projects]
+  (for [{pipeline-url :pipeline-url name :name} projects]
+    {:url (str pipeline-url "/lambda-ui/lambdaui") :text name}))
+
 (defn pipeline-for [project]
   (let [home-dir     (str (Files/createTempDirectory "lambdacd" (into-array FileAttribute [])))
-        config       { :home-dir home-dir :name (:name project)}
+        config       {:home-dir home-dir :name (:name project)
+                      :ui-config {:navbar {:links (mk-lambda-ui-links projects)}}}
         pipeline-def (mk-pipeline-def project)
         pipeline     (lambdacd/assemble-pipeline pipeline-def config)
         app          (compojure/routes
-                       (custom-ui/ui-for pipeline projects)
+                       (compojure/context "/lambda-ui" [] (lambdaui/ui-for pipeline :contextPath (str (:pipeline-url project) "/" "lambda-ui")))
+                       (compojure/context "/reference-ui" [] (custom-ui/ui-for pipeline projects))
                        (git/notifications-for pipeline))]
     (runners/start-one-run-after-another pipeline)
     app))
@@ -55,7 +62,10 @@
 
 ;; Nice overview page:
 (defn mk-link [{url :pipeline-url name :name}]
-  [:li [:a {:href (str url "/")} name]])
+  [:li [:span
+        [:a {:href (str url "/reference-ui/")} name]
+        " "
+        [:a {:href (str url "/lambda-ui/lambdaui")} "(LambdaUI)"]]])
 
 (defn mk-index [projects]
   (h/html
@@ -71,5 +81,4 @@
         contexts (map mk-context projects)
         routes (apply compojure/routes
                       (conj contexts (compojure/GET "/" [] (mk-index projects))))]
-       (ring-server/serve routes {:open-browser? false
-                               :port 8080})))
+       (http-kit/run-server routes {:port 8080})))
