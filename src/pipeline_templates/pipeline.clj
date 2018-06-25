@@ -3,15 +3,16 @@
         [lambdacd.steps.manualtrigger]
         [pipeline-templates.steps])
   (:require
-        [ring.server.standalone :as ring-server]
-        [pipeline-templates.custom-ui :as custom-ui]
-        [lambdacd-git.core :as git]
-        [lambdacd.runners :as runners]
-        [lambdacd.util :as util]
-        [lambdacd.core :as lambdacd]
-        [compojure.core :as compojure]
-        [hiccup.core :as h])
-  (:gen-class))
+    [ring.server.standalone :as ring-server]
+    [pipeline-templates.custom-ui :as custom-ui]
+    [lambdacd-git.core :as git]
+    [lambdacd.runners :as runners]
+    [lambdacd.core :as lambdacd]
+    [compojure.core :as compojure]
+    [hiccup.core :as h])
+  (:gen-class)
+  (:import (java.nio.file.attribute FileAttribute)
+           (java.nio.file Files)))
 
 (def projects [{:name         "LambdaCD"
                 :pipeline-url "/lambdacd"
@@ -37,7 +38,7 @@
        publish)))
 
 (defn pipeline-for [project]
-  (let [home-dir     (util/create-temp-dir)
+  (let [home-dir     (str (Files/createTempDirectory "lambdacd" (into-array FileAttribute [])))
         config       { :home-dir home-dir :name (:name project)}
         pipeline-def (mk-pipeline-def project)
         pipeline     (lambdacd/assemble-pipeline pipeline-def config)
